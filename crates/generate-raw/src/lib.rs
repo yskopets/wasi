@@ -59,8 +59,10 @@ trait Render {
 impl Render for NamedType {
     fn render(&self, src: &mut String) {
         let name = self.name.as_str();
-        match &self.dt {
+        match &self.tref {
             TypeRef::Value(ty) => match &**ty {
+                Type::Int(e) => render_int(src, name, e),
+                Type::USize => render_usize(src, name),
                 Type::Enum(e) => render_enum(src, name, e),
                 Type::Flags(f) => render_flags(src, name, f),
                 Type::Struct(s) => render_struct(src, name, s),
@@ -69,11 +71,19 @@ impl Render for NamedType {
                 Type::Array { .. }
                 | Type::Pointer { .. }
                 | Type::ConstPointer { .. }
-                | Type::Builtin { .. } => render_alias(src, name, &self.dt),
+                | Type::Builtin { .. } => render_alias(src, name, &self.tref),
             },
-            TypeRef::Name(_nt) => render_alias(src, name, &self.dt),
+            TypeRef::Name(_nt) => render_alias(src, name, &self.tref),
         }
     }
+}
+
+fn render_int(_src: &mut String, _name: &str, _i: &IntDatatype) {
+    panic!("not implemented yet")
+}
+
+fn render_usize(_src: &mut String, _name: &str) {
+    panic!("not implemented yet")
 }
 
 fn render_union(src: &mut String, name: &str, u: &UnionDatatype) {
@@ -213,6 +223,7 @@ impl Render for BuiltinType {
     fn render(&self, src: &mut String) {
         match self {
             BuiltinType::String => src.push_str("&str"),
+            BuiltinType::Char8 => src.push_str("u8"),
             BuiltinType::U8 => src.push_str("u8"),
             BuiltinType::U16 => src.push_str("u16"),
             BuiltinType::U32 => src.push_str("u32"),
